@@ -10,10 +10,11 @@ public class CameraController : MonoBehaviour {
         Cursor.lockState = CursorLockMode.Locked;
         cSensitivity = 5f;
         cVelocity = .2f;
-        minVel = .02f;
-        maxVel = 2f;
-        velIncrease = .02f;
+        minVel = .04f;
+        maxVel = 4f;
+        velIncrease = .04f;
     }
+
 
     void Update() {
         // Mouselook
