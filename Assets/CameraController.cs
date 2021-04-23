@@ -11,7 +11,7 @@ public class CameraController : MonoBehaviour {
         cSensitivity = 5f;
         cVelocity = .2f;
         minVel = .04f;
-        maxVel = 4f;
+        maxVel = 8f;
         velIncrease = .04f;
     }
 
