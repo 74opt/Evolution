@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Berry : MonoBehaviour {
-    void Start() {
-        
+    public float value;
+
+    void Awake() {
+        value = 7f;
     }
 }
