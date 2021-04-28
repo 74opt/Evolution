@@ -6,6 +6,7 @@ using UnityEngine;
 public class Spawner : MonoBehaviour {
     public GameObject organism;
     public GameObject berry;
+    public static int totalNumber;
     GameObject organismInstance;
     
     IEnumerator FoodSpawnCoroutine;
@@ -23,23 +24,23 @@ public class Spawner : MonoBehaviour {
     }
 
     void Start() {
+        totalNumber = 0;
+
         for (int i = 0; i < 10; i++) {
+            totalNumber += 1;
+
             organismInstance = Instantiate(organism, new Vector3(UnityEngine.Random.Range(-45, 45), 1, UnityEngine.Random.Range(-45, 45)), transform.rotation);
 
             // Starting values
             organismInstance.GetComponent<OrganismObject>().speed = UnityEngine.Random.Range(.01f, .1f);
-            organismInstance.GetComponent<OrganismObject>().deathValue = 100/*Convert.ToSingle(Math.Pow(organismInstance.GetComponent<OrganismObject>().speed, UnityEngine.Random.Range(-1f, -.8f)) * 10)*/;
+            organismInstance.GetComponent<OrganismObject>().deathValue = 100;
             organismInstance.GetComponent<OrganismObject>().metabolism = organismInstance.GetComponent<OrganismObject>().speed * UnityEngine.Random.Range(15f, 20f);
-            organismInstance.GetComponent<OrganismObject>().number = i + 1;
+            organismInstance.name = $"Organism {Spawner.totalNumber}";
 
-            print($"Organism {organismInstance.GetComponent<OrganismObject>().number}: Speed - {organismInstance.GetComponent<OrganismObject>().speed}. Metabolism - {organismInstance.GetComponent<OrganismObject>().metabolism}");
+            print($"{organismInstance.name}: Speed - {organismInstance.GetComponent<OrganismObject>().speed}. Metabolism - {organismInstance.GetComponent<OrganismObject>().metabolism}");
         }
 
-        FoodSpawnCoroutine = FoodSpawn(10, 15f);
+        FoodSpawnCoroutine = FoodSpawn(100, 15f);
         StartCoroutine(FoodSpawnCoroutine);
-    }
-
-    void Update() {
-        
     }
 }

@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -1855117075146564506}
   m_Layer: 0
   m_Name: Organism
-  m_TagString: Untagged
+  m_TagString: Organism
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -127,6 +127,8 @@ MonoBehaviour:
   hunger: 0
   hungerTick: 0
   number: 0
+  minOffspring: 0
+  maxOffspring: 0
   speed: 0
   deathValue: 0
   metabolism: 0
