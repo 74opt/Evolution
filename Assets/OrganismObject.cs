@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class OrganismObject : MonoBehaviour {
     // Standard Traits
-    public float hunger, hungerTick, number, minOffspring, maxOffspring;
+    public float hunger, hungerTick, number, generation, hungerColor;
+    public int minOffspring, maxOffspring;
     
 
     // Evolution Traits 
     public float speed, deathValue, metabolism, detectionRadius;
 
     // ETC
+    MeshRenderer mesh;
+
     IEnumerator HungerCoroutine, AgeCoroutine;
     GameObject closestEntity;
     GameObject closestFood, closestOrganism;
@@ -28,12 +31,15 @@ public class OrganismObject : MonoBehaviour {
     }
 
     void Awake() {
+        // Components
+        mesh = GetComponent<MeshRenderer>();
+
         // Hunger
         hunger = 50f/*deathValue/2*/;
         hungerTick = 1;
 
         // Offspring
-        minOffspring = 1;
+        minOffspring = 0;
         maxOffspring = 2;
 
         // Starts hunger tick 
@@ -41,18 +47,20 @@ public class OrganismObject : MonoBehaviour {
         StartCoroutine(HungerCoroutine);
 
         // Kills off organism after specific amount of time
-        AgeCoroutine = AgeHandler(Random.Range(40, 50));
+        AgeCoroutine = AgeHandler(Random.Range(80, 100));
         StartCoroutine(AgeCoroutine);
 
         // To get rid of starting errors
-        // TODO Create gameobject to default to when no other object exists nearby?
+        // TODO Create gameobject to default to when no other object exists nearby? maybe.
         closestFood = gameObject;
+
+        //mesh.material.SetColor("_Color", Color.red);
     }
 
     void Update() {
         // Death
         if (hunger >= 100) {
-            print($"{gameObject.name} has died after {Time.realtimeSinceStartup} seconds!");
+            //print($"{gameObject.name} has died after {Time.realtimeSinceStartup} seconds!");
             Destroy(gameObject);
         }
 
@@ -73,7 +81,19 @@ public class OrganismObject : MonoBehaviour {
         }
 
         // Physical traits
+        // Scaling (based on speed + metabolism)
         transform.localScale = new Vector3(System.Convert.ToSingle(System.Math.Pow(metabolism, -1f)), speed * 20, System.Convert.ToSingle(System.Math.Pow(metabolism, -1f)));
+
+        // Color (based on hunger)
+        hungerColor = -System.Math.Abs((.02f * hunger) - 1) + 1;
+
+        if (hunger < 50) {
+            //hungerColor = .02f * hunger;
+            mesh.material.SetColor("_Color", new Color(hungerColor, 1, 0, 1));
+        } else {
+            //hungerColor = System.Math.Abs((-.02f * hunger) + .02f);
+            mesh.material.SetColor("_Color", new Color(1, hungerColor, 0, 1)); 
+        }
     }
 
     List<GameObject> Search(string tag) {
@@ -125,28 +145,29 @@ public class OrganismObject : MonoBehaviour {
         // Eat Food
         if (collider.gameObject.CompareTag("Food")) {
             hunger -= collider.gameObject.GetComponent<Berry>().value;
-            print($"{gameObject.name} ate. Hunger is {hunger}.");
+            //print($"{gameObject.name} ate. Hunger is {hunger}.");
             Destroy(collider.gameObject);
         }
 
         // Create baby
         if (collider.gameObject.CompareTag("Organism")) {
             if (collider.gameObject.GetComponent<OrganismObject>().hunger <= 0) {  // no && to avoid any errors about not being able to get OrganismObject script
-                for (int i = 0; i < Random.Range(minOffspring, maxOffspring); i++) {
+                for (int i = 0; i < Random.Range(minOffspring, maxOffspring + 1); i++) {
                     Spawner.totalNumber += 1;
 
-                    GameObject organismInstance = Instantiate(gameObject, transform);
+                    GameObject organismInstance = Instantiate(gameObject, transform.position + new Vector3(Random.Range(-2, 3), 0, Random.Range(-2, 3)), transform.rotation);  // ???????????????????????????????????????????????
 
                     organismInstance.GetComponent<OrganismObject>().speed = (gameObject.GetComponent<OrganismObject>().speed + collider.gameObject.GetComponent<OrganismObject>().speed) / 2 * Random.Range(.85f, 1.15f);
                     organismInstance.GetComponent<OrganismObject>().deathValue = 100;
                     organismInstance.GetComponent<OrganismObject>().metabolism = organismInstance.GetComponent<OrganismObject>().speed * UnityEngine.Random.Range(15f, 20f);
                     organismInstance.name = $"Organism {Spawner.totalNumber}";
+                    organismInstance.GetComponent<OrganismObject>().generation = generation + 1;
 
                     print($"{gameObject.name} and {collider.gameObject.name} have given birth to {organismInstance.gameObject.name}:\nSpeed - {organismInstance.GetComponent<OrganismObject>().speed}. Metabolism - {organismInstance.GetComponent<OrganismObject>().metabolism}");
                     transform.DetachChildren();
                 }
 
-                hunger += Random.Range(60f, 75f);
+                hunger = Random.Range(60f, 75f);
             }
         }
     }

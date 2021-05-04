@@ -14,7 +14,7 @@ public class Spawner : MonoBehaviour {
     IEnumerator FoodSpawn(int foodAmount, float time) {
         while (true) {
             for (int i = 0; i < foodAmount; i++) {
-                Instantiate(berry, new Vector3(UnityEngine.Random.Range(-45, 45), 1, UnityEngine.Random.Range(-45, 45)), transform.rotation);
+                Instantiate(berry, new Vector3(UnityEngine.Random.Range(-45, 45), .3f, UnityEngine.Random.Range(-45, 45)), transform.rotation);
             }
 
             print($"{foodAmount} food entities have spawned.");
@@ -32,10 +32,11 @@ public class Spawner : MonoBehaviour {
             organismInstance = Instantiate(organism, new Vector3(UnityEngine.Random.Range(-45, 45), 1, UnityEngine.Random.Range(-45, 45)), transform.rotation);
 
             // Starting values
-            organismInstance.GetComponent<OrganismObject>().speed = UnityEngine.Random.Range(.01f, .1f);
+            organismInstance.GetComponent<OrganismObject>().speed = UnityEngine.Random.Range(.005f, .1f);
             organismInstance.GetComponent<OrganismObject>().deathValue = 100;
             organismInstance.GetComponent<OrganismObject>().metabolism = organismInstance.GetComponent<OrganismObject>().speed * UnityEngine.Random.Range(15f, 20f);
             organismInstance.name = $"Organism {Spawner.totalNumber}";
+            organismInstance.GetComponent<OrganismObject>().generation = 1;
 
             print($"{organismInstance.name}: Speed - {organismInstance.GetComponent<OrganismObject>().speed}. Metabolism - {organismInstance.GetComponent<OrganismObject>().metabolism}");
         }

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2790588124423192183}
   - component: {fileID: 5184846968349833688}
   - component: {fileID: -1855117075146564506}
+  - component: {fileID: 1403274402793393710}
   m_Layer: 0
   m_Name: Organism
   m_TagString: Organism
@@ -91,7 +92,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 1346154115118556648}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
@@ -129,7 +130,21 @@ MonoBehaviour:
   number: 0
   minOffspring: 0
   maxOffspring: 0
+  generation: 0
   speed: 0
   deathValue: 0
   metabolism: 0
   detectionRadius: 0
+--- !u!65 &1403274402793393710
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1346154115118556648}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 2, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
