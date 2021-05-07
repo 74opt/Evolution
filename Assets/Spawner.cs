@@ -17,7 +17,7 @@ public class Spawner : MonoBehaviour {
                 Instantiate(berry, new Vector3(UnityEngine.Random.Range(-45, 45), .3f, UnityEngine.Random.Range(-45, 45)), transform.rotation);
             }
 
-            print($"{foodAmount} food entities have spawned.");
+            //print($"{foodAmount} food entities have spawned.");
 
             yield return new WaitForSeconds(time);
         }

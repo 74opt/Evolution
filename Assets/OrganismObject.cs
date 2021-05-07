@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class OrganismObject : MonoBehaviour {
     // Standard Traits
-    public float hunger, hungerTick, number, generation, hungerColor;
+    public float hunger, hungerTick, number, generation, hungerColor, age, ageAlpha;
     public int minOffspring, maxOffspring;
     
 
@@ -25,10 +25,10 @@ public class OrganismObject : MonoBehaviour {
         }
     }
 
-    IEnumerator AgeHandler(float ageTotal) {
-        yield return new WaitForSeconds(ageTotal);
-        Destroy(gameObject);
-    }
+    // IEnumerator AgeHandler(float ageTotal) {
+    //     yield return new WaitForSeconds(ageTotal);
+    //     Destroy(gameObject);
+    // }
 
     void Awake() {
         // Components
@@ -39,27 +39,30 @@ public class OrganismObject : MonoBehaviour {
         hungerTick = 1;
 
         // Offspring
-        minOffspring = 0;
-        maxOffspring = 2;
+        minOffspring = 1;
+        maxOffspring = 3;
 
         // Starts hunger tick 
         HungerCoroutine = HungerTick();
         StartCoroutine(HungerCoroutine);
 
         // Kills off organism after specific amount of time
-        AgeCoroutine = AgeHandler(Random.Range(80, 100));
-        StartCoroutine(AgeCoroutine);
+        age = Random.Range(80f, 100f);
+        // AgeCoroutine = AgeHandler(age);
+        // StartCoroutine(AgeCoroutine);
 
         // To get rid of starting errors
         // TODO Create gameobject to default to when no other object exists nearby? maybe.
         closestFood = gameObject;
-
-        //mesh.material.SetColor("_Color", Color.red);
     }
 
     void Update() {
+        // Age
+        age -= Time.deltaTime;
+
+    
         // Death
-        if (hunger >= 100) {
+        if (hunger >= 100 || age <= 0) {
             //print($"{gameObject.name} has died after {Time.realtimeSinceStartup} seconds!");
             Destroy(gameObject);
         }
@@ -80,23 +83,25 @@ public class OrganismObject : MonoBehaviour {
             closestEntity = SearchForClosest("Food");
         }
 
-        // Physical traits
         // Scaling (based on speed + metabolism)
         transform.localScale = new Vector3(System.Convert.ToSingle(System.Math.Pow(metabolism, -1f)), speed * 20, System.Convert.ToSingle(System.Math.Pow(metabolism, -1f)));
 
-        // Color (based on hunger)
+        // Color (color is based on hunger, alpha is based on age)
         hungerColor = -System.Math.Abs((.02f * hunger) - 1) + 1;
+        // ageAlpha = age / 100; // TODO: create physical trait for age
 
-        if (hunger < 50) {
+        if (hunger > 0 && hunger < 50) {
             //hungerColor = .02f * hunger;
             mesh.material.SetColor("_Color", new Color(hungerColor, 1, 0, 1));
-        } else {
+        } else if (hunger > 50 && hunger < 100) {
             //hungerColor = System.Math.Abs((-.02f * hunger) + .02f);
             mesh.material.SetColor("_Color", new Color(1, hungerColor, 0, 1)); 
+        } else if (hunger <= 0) {
+            mesh.material.SetColor("_Color", new Color(1, 0, 1, 1)); 
         }
     }
 
-    List<GameObject> Search(string tag) {
+    public static List<GameObject> Search(string tag) {
         List<GameObject> filteredList = new List<GameObject>();
 
         Collider[] nearbyObjects = Physics.OverlapSphere(new Vector3(0, 0, 0), Mathf.Infinity);
@@ -138,7 +143,9 @@ public class OrganismObject : MonoBehaviour {
     }
 
     private void FixedUpdate() {
-        transform.position = Vector3.MoveTowards(transform.position, closestEntity.transform.position, speed);
+        try {
+            transform.position = Vector3.MoveTowards(transform.position, closestEntity.transform.position, speed);
+        } catch (System.Exception) {}
     }
 
     private void OnCollisionEnter(Collision collider) {
@@ -151,7 +158,7 @@ public class OrganismObject : MonoBehaviour {
 
         // Create baby
         if (collider.gameObject.CompareTag("Organism")) {
-            if (collider.gameObject.GetComponent<OrganismObject>().hunger <= 0) {  // no && to avoid any errors about not being able to get OrganismObject script
+            if (collider.gameObject.GetComponent<OrganismObject>().hunger <= 0 && hunger <= 0) {
                 for (int i = 0; i < Random.Range(minOffspring, maxOffspring + 1); i++) {
                     Spawner.totalNumber += 1;
 
