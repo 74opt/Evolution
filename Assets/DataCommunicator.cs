@@ -7,18 +7,25 @@ using UnityEngine;
 public class DataCommunicator : MonoBehaviour {
     /* 
      * File Format:
+     * Time between each recorded point
      * Time since startup
      * Organism Number
-     * Berry Number
+     * Food Number
     */
 
     const string file = "Assets\\data.txt";
     StreamWriter sw;
     IEnumerator DataCoroutine;
     IEnumerator DataUpdater(int update) {
+        int totalTime = 0;
+
         while (true) {
             using (StreamWriter sw = File.CreateText(file)) {
-                sw.WriteLine(Time.realtimeSinceStartup);
+                sw.WriteLine(update);
+
+                sw.WriteLine(totalTime);
+
+                yield return new WaitForSeconds(.01f);  // just to fix a thing
 
                 List<GameObject> organismList = OrganismObject.Search("Organism");
                 sw.WriteLine(organismList.Count);
@@ -30,6 +37,7 @@ public class DataCommunicator : MonoBehaviour {
             yield return new WaitForSeconds(update);
 
             File.WriteAllText(file, String.Empty);
+            totalTime += update;
         }
     }
 
