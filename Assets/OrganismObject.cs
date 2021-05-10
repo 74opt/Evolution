@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class OrganismObject : MonoBehaviour {
     // Standard Traits
-    public float hunger, hungerTick, number, generation, hungerColor, age, ageAlpha;
+    public float hunger, hungerTick, number, generation, hungerColor, ageAlpha;
     public int minOffspring, maxOffspring;
+    public bool ageSet;
     
 
     // Evolution Traits 
-    public float speed, deathValue, metabolism, detectionRadius;
+    public float speed, deathValue, metabolism, age, detectionRadius;
 
     // ETC
     MeshRenderer mesh;
 
-    IEnumerator HungerCoroutine, AgeCoroutine;
+    IEnumerator HungerCoroutine, AgeCoroutine, SetAgeCoroutine;
     GameObject closestEntity;
     GameObject closestFood, closestOrganism;
 
@@ -25,12 +26,19 @@ public class OrganismObject : MonoBehaviour {
         }
     }
 
+    IEnumerator SetAge(float metabolism) {
+        yield return new WaitForSeconds(.01f);
+        yield return Random.Range(60f, 80f) * metabolism;
+    }
+
     // IEnumerator AgeHandler(float ageTotal) {
     //     yield return new WaitForSeconds(ageTotal);
     //     Destroy(gameObject);
     // }
 
     void Awake() {
+        transform.parent = null;
+
         // Components
         mesh = GetComponent<MeshRenderer>();
 
@@ -46,10 +54,8 @@ public class OrganismObject : MonoBehaviour {
         HungerCoroutine = HungerTick();
         StartCoroutine(HungerCoroutine);
 
-        // Kills off organism after specific amount of time
-        age = Random.Range(80f, 100f);
-        // AgeCoroutine = AgeHandler(age);
-        // StartCoroutine(AgeCoroutine);
+        // initial age so error doesnt happen
+        //age = 100f;
 
         // To get rid of starting errors
         // TODO Create gameobject to default to when no other object exists nearby? maybe.
@@ -60,7 +66,6 @@ public class OrganismObject : MonoBehaviour {
         // Age
         age -= Time.deltaTime;
 
-    
         // Death
         if (hunger >= 100 || age <= 0) {
             //print($"{gameObject.name} has died after {Time.realtimeSinceStartup} seconds!");
@@ -69,22 +74,27 @@ public class OrganismObject : MonoBehaviour {
 
         // Reproduce
         if (hunger <= 0) {
-            closestOrganism = SearchForClosest("Organism");
+            closestOrganism = SearchForClosest("Organism", detectionRadius);
 
             if (closestOrganism.gameObject.GetComponent<OrganismObject>().hunger <= 0) {
                 closestEntity = closestOrganism;
             } else {
-                closestEntity = SearchForClosest("Food");  // if cant find possible mate to reproduce, just keep eating food
+                closestEntity = SearchForClosest("Food", detectionRadius);  // if cant find possible mate to reproduce, just keep eating food
             }
         }
 
         // Food searching
         if (0 < hunger && hunger < 100) { 
-            closestEntity = SearchForClosest("Food");
+            closestEntity = SearchForClosest("Food", detectionRadius);
         }
 
-        // Scaling (based on speed + metabolism)
-        transform.localScale = new Vector3(System.Convert.ToSingle(System.Math.Pow(metabolism, -1f)), speed * 20, System.Convert.ToSingle(System.Math.Pow(metabolism, -1f)));
+        // Scaling main body(based on speed + metabolism)
+        float bodyScale = System.Convert.ToSingle(System.Math.Pow(metabolism - detectionRadius/2, -1f));
+        transform.localScale = new Vector3(bodyScale, speed * 20, bodyScale);
+
+        // Scaling cube (based on detection radius)
+        float cubeScale = .6f * (detectionRadius/1.5f);
+        transform.GetChild(0).localScale = new Vector3(cubeScale, cubeScale, cubeScale);
 
         // Color (color is based on hunger, alpha is based on age)
         hungerColor = -System.Math.Abs((.02f * hunger) - 1) + 1;
@@ -101,7 +111,7 @@ public class OrganismObject : MonoBehaviour {
         }
     }
 
-    public static List<GameObject> Search(string tag) {
+    public static List<GameObject> Search(string tag, float detectionRadius) {
         List<GameObject> filteredList = new List<GameObject>();
 
         Collider[] nearbyObjects = Physics.OverlapSphere(new Vector3(0, 0, 0), Mathf.Infinity);
@@ -114,8 +124,8 @@ public class OrganismObject : MonoBehaviour {
         return filteredList;
     }
 
-    GameObject SearchForClosest(string tag) {
-        List<GameObject> findingList = Search(tag);
+    GameObject SearchForClosest(string tag, float detectionRadius) {
+        List<GameObject> findingList = Search(tag, detectionRadius);
         GameObject closest;
 
         closest = gameObject;
@@ -162,16 +172,21 @@ public class OrganismObject : MonoBehaviour {
                 for (int i = 0; i < Random.Range(minOffspring, maxOffspring + 1); i++) {
                     Spawner.totalNumber += 1;
 
-                    GameObject organismInstance = Instantiate(gameObject, transform.position + new Vector3(Random.Range(-2, 3), 0, Random.Range(-2, 3)), transform.rotation);  // ???????????????????????????????????????????????
+                    GameObject organismInstance = Instantiate(gameObject, transform.position + new Vector3(Random.Range(-2, 3), 0, Random.Range(-2, 3)), transform.rotation);
 
-                    organismInstance.GetComponent<OrganismObject>().speed = (gameObject.GetComponent<OrganismObject>().speed + collider.gameObject.GetComponent<OrganismObject>().speed) / 2 * Random.Range(.85f, 1.15f);
+                    organismInstance.GetComponent<OrganismObject>().speed = ((gameObject.GetComponent<OrganismObject>().speed + collider.gameObject.GetComponent<OrganismObject>().speed) / 2) * Random.Range(.85f, 1.15f);
                     organismInstance.GetComponent<OrganismObject>().deathValue = 100;
                     organismInstance.GetComponent<OrganismObject>().metabolism = organismInstance.GetComponent<OrganismObject>().speed * UnityEngine.Random.Range(15f, 20f);
+
+                    organismInstance.GetComponent<OrganismObject>().detectionRadius = ((gameObject.GetComponent<OrganismObject>().detectionRadius + collider.gameObject.GetComponent<OrganismObject>().detectionRadius) / 2) * Random.Range(.85f, 1.15f);
+                    organismInstance.GetComponent<OrganismObject>().metabolism += organismInstance.GetComponent<OrganismObject>().detectionRadius;
+
                     organismInstance.name = $"Organism {Spawner.totalNumber}";
                     organismInstance.GetComponent<OrganismObject>().generation = generation + 1;
 
+                    organismInstance.GetComponent<OrganismObject>().age = (organismInstance.GetComponent<OrganismObject>().metabolism / 1.5f) * UnityEngine.Random.Range(90f, 120f);
+
                     print($"{gameObject.name} and {collider.gameObject.name} have given birth to {organismInstance.gameObject.name}:\nSpeed - {organismInstance.GetComponent<OrganismObject>().speed}. Metabolism - {organismInstance.GetComponent<OrganismObject>().metabolism}");
-                    transform.DetachChildren();
                 }
 
                 hunger = Random.Range(60f, 75f);

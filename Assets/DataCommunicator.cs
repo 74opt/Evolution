@@ -27,10 +27,10 @@ public class DataCommunicator : MonoBehaviour {
 
                 yield return new WaitForSeconds(.01f);  // just to fix a thing
 
-                List<GameObject> organismList = OrganismObject.Search("Organism");
+                List<GameObject> organismList = OrganismObject.Search("Organism", Mathf.Infinity);
                 sw.WriteLine(organismList.Count);
 
-                List<GameObject> foodList = OrganismObject.Search("Food");
+                List<GameObject> foodList = OrganismObject.Search("Food", Mathf.Infinity);
                 sw.WriteLine(foodList.Count);
             }
 

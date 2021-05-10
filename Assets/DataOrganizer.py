@@ -18,7 +18,7 @@ while True:
     organisms = int(data[2][:-1])
     food = int(data[3][:-1])
 
-    print(f"Time: {total_time}\nOrganism #: {organisms}\nFood #: {food}")
+    print(f"Time: {total_time}\nOrganism #: {organisms}\nFood #: {food}\n")
 
     time.sleep(update * 10)
     
