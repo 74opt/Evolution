@@ -1,4 +1,6 @@
 import time
+import numpy as np
+import matplotlib.pyplot as plt  # 3.4.2
 
 data = open("Assets\data.txt", "r").readlines()
 update = int(data[0][:-2])
