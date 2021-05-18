@@ -11,11 +11,18 @@ public class Spawner : MonoBehaviour {
     
     IEnumerator FoodSpawnCoroutine;
 
-    IEnumerator FoodSpawn(int foodAmount, float time) {
+    IEnumerator FoodSpawn(int foodAmount, float time, int capacity) {
         while (true) {
-            for (int i = 0; i < foodAmount; i++) {
-                Instantiate(berry, new Vector3(UnityEngine.Random.Range(-110, 110), .3f, UnityEngine.Random.Range(-110, 110)), transform.rotation);
+        
+            int foodCount = OrganismObject.Search("Food", Mathf.Infinity).Count;
+
+            if (foodCount + 500 > capacity) {
+                foodAmount = capacity - foodCount;
             }
+
+            for (int i = 0; i < foodAmount; i++) {
+                    Instantiate(berry, new Vector3(UnityEngine.Random.Range(-110, 110), .3f, UnityEngine.Random.Range(-110, 110)), transform.rotation);
+                }
 
             //print($"{foodAmount} food entities have spawned.");
 
@@ -47,7 +54,7 @@ public class Spawner : MonoBehaviour {
             print($"{organismInstance.name}: Speed - {organismInstance.GetComponent<OrganismObject>().speed}. Metabolism - {organismInstance.GetComponent<OrganismObject>().metabolism}");
         }
 
-        FoodSpawnCoroutine = FoodSpawn(500, 20f);
+        FoodSpawnCoroutine = FoodSpawn(500, 20f, 1500);
         StartCoroutine(FoodSpawnCoroutine);
     }
 }

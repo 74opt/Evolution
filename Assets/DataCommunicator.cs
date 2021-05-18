@@ -17,7 +17,7 @@ public class DataCommunicator : MonoBehaviour {
     StreamWriter sw;
     IEnumerator DataCoroutine;
     IEnumerator DataUpdater(int update) {
-        int totalTime = 0;
+        float totalTime = 0;
 
         while (true) {
             using (StreamWriter sw = File.CreateText(file)) {
@@ -37,7 +37,7 @@ public class DataCommunicator : MonoBehaviour {
             yield return new WaitForSeconds(update);
 
             File.WriteAllText(file, String.Empty);
-            totalTime += update;
+            totalTime = Time.realtimeSinceStartup;
         }
     }
 
@@ -52,7 +52,7 @@ public class DataCommunicator : MonoBehaviour {
         // clear file
         File.WriteAllText(file, String.Empty);
 
-        DataCoroutine = DataUpdater(30);
+        DataCoroutine = DataUpdater(20);
         StartCoroutine(DataCoroutine);
 
         // using (StreamWriter sw = File.CreateText(file)) {
