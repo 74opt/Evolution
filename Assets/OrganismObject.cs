@@ -155,6 +155,8 @@ public class OrganismObject : MonoBehaviour {
     private void FixedUpdate() {
         try {
             transform.position = Vector3.MoveTowards(transform.position, closestEntity.transform.position, speed);
+
+            transform.rotation = Quaternion.LookRotation(Vector3.forward, closestEntity.transform.position - transform.position);
         } catch (System.Exception) {}
     }
 
